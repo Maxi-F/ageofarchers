@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Item" load_steps=3 format=3 uid="uid://cqo8wt40q3r4q"]
+
+[ext_resource type="Texture2D" uid="uid://8u6oj0qgq2iu" path="res://Objects/Arrow.png" id="1_dfx4m"]
+[ext_resource type="Script" path="res://Item/item.gd" id="1_eqbhp"]
+
+[resource]
+script = ExtResource("1_eqbhp")
+id = 7
+icon = ExtResource("1_dfx4m")
+name = "Arrow"
+stackable = true
+amount = 1
+info = "A simple arrow"
+equipable = false
+type = 3

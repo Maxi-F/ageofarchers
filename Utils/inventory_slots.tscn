@@ -1,0 +1,176 @@
+[gd_scene load_steps=3 format=3 uid="uid://db2hfpuk88ew5"]
+
+[ext_resource type="PackedScene" uid="uid://c4aytncy78jbd" path="res://Item/inventory_item_slot.tscn" id="1_gqpu3"]
+
+[sub_resource type="GDScript" id="GDScript_kown7"]
+resource_name = "InventorySlots"
+script/source = "extends Control
+
+@export var slots_container : GridContainer
+@onready var slots : Array = slots_container.get_children()
+
+signal item_start_dragging(item)
+signal item_highlighted(item)
+signal item_highlighted_exited
+
+var current_highlighted_slot : Panel = null
+var current_dragging_slot : Panel = null
+
+func _ready():
+	for slot in slots:
+		slot.item_start_dragging.connect(on_item_start_dragging)
+		slot.item_highlighted.connect(on_item_highlighted)
+		slot.item_highlighted_exited.connect(on_item_highlighted_exited)
+	pass
+
+func on_item_start_dragging(item : Item, slot : Panel):
+	item_start_dragging.emit(item)
+	current_dragging_slot = slot
+	pass
+
+func on_item_highlighted(item : Item, slot):
+	item_highlighted.emit(item)
+	current_highlighted_slot = slot
+	pass
+
+func on_item_highlighted_exited():
+	item_highlighted_exited.emit()
+	pass
+
+func check_drop_item(item : Item):
+	move_item_slot(current_dragging_slot, current_highlighted_slot, item)
+	pass
+
+func move_item_slot(current_dragging_slot, current_highlighted_slot, item):
+	var aux = current_highlighted_slot.item_ref
+	if aux:
+		current_dragging_slot.set_data(aux)
+	else:
+		if current_dragging_slot:
+			current_dragging_slot.reset()
+	current_highlighted_slot.set_data(item)
+	current_dragging_slot = null
+	current_highlighted_slot = null
+	pass
+
+func add_item(item : Item):
+	var slot_item_found : Panel = find_item(item)
+	if slot_item_found:
+		slot_item_found.update_data()
+	else:
+		if current_dragging_slot == null:
+			for slot in slots:
+				if slot.item_ref == null:
+					slot.set_data(item)
+					break
+		else:
+			check_drop_item(item)
+	pass
+
+func find_item(item : Item):
+	for slot in slots:
+		if slot.item_ref == item:
+			return slot
+	return null
+
+func remove_item(item : Item):
+	for slot in slots:
+		if slot.item_ref == item:
+			slot.reset()
+			break
+	current_dragging_slot = null
+	current_highlighted_slot = null
+	pass
+
+
+func _on_inventory_drop_item(item : Item):
+	current_dragging_slot = null
+	current_highlighted_slot = null
+	pass # Replace with function body.
+
+
+func _on_mouse_exited():
+	current_highlighted_slot = null
+	pass # Replace with function body.
+"
+
+[node name="InventorySlots" type="Control" node_paths=PackedStringArray("slots_container")]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 320.0
+offset_bottom = 256.0
+script = SubResource("GDScript_kown7")
+slots_container = NodePath("Slots")
+
+[node name="Slots" type="GridContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/h_separation = 0
+theme_override_constants/v_separation = 0
+columns = 5
+
+[node name="InventoryItemSlot" parent="Slots" instance=ExtResource("1_gqpu3")]
+layout_mode = 2
+
+[node name="InventoryItemSlot2" parent="Slots" instance=ExtResource("1_gqpu3")]
+layout_mode = 2
+
+[node name="InventoryItemSlot3" parent="Slots" instance=ExtResource("1_gqpu3")]
+layout_mode = 2
+
+[node name="InventoryItemSlot4" parent="Slots" instance=ExtResource("1_gqpu3")]
+layout_mode = 2
+
+[node name="InventoryItemSlot5" parent="Slots" instance=ExtResource("1_gqpu3")]
+layout_mode = 2
+
+[node name="InventoryItemSlot6" parent="Slots" instance=ExtResource("1_gqpu3")]
+layout_mode = 2
+
+[node name="InventoryItemSlot7" parent="Slots" instance=ExtResource("1_gqpu3")]
+layout_mode = 2
+
+[node name="InventoryItemSlot8" parent="Slots" instance=ExtResource("1_gqpu3")]
+layout_mode = 2
+
+[node name="InventoryItemSlot9" parent="Slots" instance=ExtResource("1_gqpu3")]
+layout_mode = 2
+
+[node name="InventoryItemSlot10" parent="Slots" instance=ExtResource("1_gqpu3")]
+layout_mode = 2
+
+[node name="InventoryItemSlot11" parent="Slots" instance=ExtResource("1_gqpu3")]
+layout_mode = 2
+
+[node name="InventoryItemSlot12" parent="Slots" instance=ExtResource("1_gqpu3")]
+layout_mode = 2
+
+[node name="InventoryItemSlot13" parent="Slots" instance=ExtResource("1_gqpu3")]
+layout_mode = 2
+
+[node name="InventoryItemSlot14" parent="Slots" instance=ExtResource("1_gqpu3")]
+layout_mode = 2
+
+[node name="InventoryItemSlot15" parent="Slots" instance=ExtResource("1_gqpu3")]
+layout_mode = 2
+
+[node name="InventoryItemSlot16" parent="Slots" instance=ExtResource("1_gqpu3")]
+layout_mode = 2
+
+[node name="InventoryItemSlot17" parent="Slots" instance=ExtResource("1_gqpu3")]
+layout_mode = 2
+
+[node name="InventoryItemSlot18" parent="Slots" instance=ExtResource("1_gqpu3")]
+layout_mode = 2
+
+[node name="InventoryItemSlot19" parent="Slots" instance=ExtResource("1_gqpu3")]
+layout_mode = 2
+
+[node name="InventoryItemSlot20" parent="Slots" instance=ExtResource("1_gqpu3")]
+layout_mode = 2
+
+[connection signal="mouse_exited" from="." to="." method="_on_mouse_exited"]

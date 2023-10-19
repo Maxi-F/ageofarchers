@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="Item" load_steps=3 format=3 uid="uid://b61jyhh5rgp0"]
+
+[ext_resource type="Texture2D" uid="uid://bvplq3qu34jl" path="res://Item/CopperOre.png" id="1_jqw3e"]
+[ext_resource type="Script" path="res://Item/item.gd" id="2_16grt"]
+
+[resource]
+script = ExtResource("2_16grt")
+id = 1
+icon = ExtResource("1_jqw3e")
+name = "Copper"
+stackable = true
+amount = 1
+info = "Can be used to craft copper lingots"
+equipable = false
+type = 4
+drop_probability = 0.2

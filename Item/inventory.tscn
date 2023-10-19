@@ -1,0 +1,363 @@
+[gd_scene load_steps=9 format=3 uid="uid://bcsihts0te1s0"]
+
+[ext_resource type="PackedScene" uid="uid://fou3wfecg6uk" path="res://Item/character_item_slot.tscn" id="2_5cqqp"]
+[ext_resource type="PackedScene" uid="uid://db2hfpuk88ew5" path="res://Utils/inventory_slots.tscn" id="2_jpdu8"]
+[ext_resource type="PackedScene" uid="uid://by4hi3fm3u8pv" path="res://Item/item_info.tscn" id="3_14qqg"]
+
+[sub_resource type="GDScript" id="GDScript_6bn6h"]
+resource_name = "Inventory"
+script/source = "extends Control
+
+@export var inventory_slots : Control
+@export var character_info : Panel
+@export var item_info : Control
+
+@onready var draggable_item_slot_scene = preload(\"res://Item/draggable_item_slot.tscn\")
+
+var current_drag_idx : int = -1
+var draggable_item_slot : Panel = null
+
+signal drop_item(item)
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	InventoryManager.item_added.connect(on_inventory_item_added)
+	InventoryManager.item_removed.connect(on_inventory_item_removed)
+	drop_item.connect(InventoryManager.on_drop_item)
+	hide()
+	item_info.hide()
+	pass # Replace with function body.
+
+func on_inventory_item_added(item : Item):
+	_add_item(item)
+	pass
+
+func on_inventory_item_removed(item : Item):
+	_remove_item(item)
+	pass
+
+func _add_item(item : Item):
+	inventory_slots.add_item(item)
+	pass
+
+func _remove_item(item : Item):
+	inventory_slots.remove_item(item)
+	pass
+
+func _create_draggable_item(item : Item):
+	draggable_item_slot = draggable_item_slot_scene.instantiate()
+	add_child(draggable_item_slot)
+	draggable_item_slot.set_data(item)
+	draggable_item_slot.drop_draggable.connect(on_drop_draggable_item)
+	pass
+
+func on_drop_draggable_item(item : Item):
+	if is_dropped_in_inventory():
+		_add_item(item)
+	elif is_dropped_in_character_panel():
+		var success = character_info.check_draggable_item(item)
+		if success:
+			inventory_slots.remove_item(item)
+		else:
+			_add_item(item)
+	else:
+		drop_item.emit(item)
+	draggable_item_slot.queue_free()
+	pass
+
+func is_dropped_in_inventory():
+	return inventory_slots.get_global_rect().has_point(get_global_mouse_position())
+
+func is_dropped_in_character_panel():
+	return character_info.get_global_rect().has_point(get_global_mouse_position())
+
+func _on_character_item_highlighted(item : Item):
+	item_info.set_data(item, 1)
+	item_info.show()
+	pass # Replace with function body.
+
+func _on_character_item_highlighted_exited():
+	item_info.hide()
+	pass # Replace with function body.
+
+func _on_character_item_dragging(item : Item):
+	_create_draggable_item(item)
+	pass # Replace with function body.
+
+func _on_inventory_slots_item_start_dragging(item : Item):
+	_create_draggable_item(item)
+	pass # Replace with function body.
+
+
+func _on_inventory_slots_item_highlighted_exited():
+	item_info.hide()
+	pass # Replace with function body.
+
+
+func _on_inventory_slots_item_highlighted(item):
+	if item == null: return
+	item_info.set_data(item, 0)
+	item_info.show()
+	pass # Replace with function body.
+
+func _on_character_item_changed(item):
+	inventory_slots.add_item(item)
+	pass # Replace with function body.
+"
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_oilkp"]
+bg_color = Color(0.328125, 0.175781, 0, 1)
+border_width_left = 8
+border_width_top = 8
+border_width_right = 8
+border_width_bottom = 8
+border_color = Color(0.188235, 0.0901961, 0, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+expand_margin_left = 8.0
+expand_margin_top = 8.0
+expand_margin_right = 8.0
+expand_margin_bottom = 8.0
+
+[sub_resource type="GDScript" id="GDScript_va6r0"]
+resource_name = "InventoryCharacter"
+script/source = "extends Panel
+
+@export var item_slots : VBoxContainer
+@export var damage_stat : Label
+@export var defense_stat : Label
+@export var speed_stat : Label
+
+signal item_highlighted(item)
+signal item_highlighted_exited()
+signal item_equip(item)
+signal item_unequip(item)
+signal item_dragging(item)
+signal item_changed(item)
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	item_equip.connect(InventoryManager.on_item_equip)
+	item_unequip.connect(InventoryManager.on_item_unequip)
+	for slot in item_slots.get_children():
+		slot.item_highlighted.connect(on_item_highlighted)
+		slot.item_highlighted_exited.connect(on_item_highlighted_exited)
+		slot.item_equip.connect(on_item_equip)
+		slot.item_unequip.connect(on_item_unequip)
+		slot.item_start_dragging.connect(on_item_dragging)
+		slot.item_changed.connect(on_item_changed)
+	GameManager.player_stats_updated.connect(on_player_stats_updated)
+	pass # Replace with function body.
+
+func on_player_stats_updated(stats : GameManager.Stats):
+	damage_stat.text = \"Damage:\" + str(stats.attack)
+	defense_stat.text = \"Defense:\" + str(stats.defense)
+	speed_stat.text = \"Movement Speed:\" + str(stats.speed)
+	pass
+
+func check_draggable_item(item : Item):
+	for slot in item_slots.get_children():
+		if mouse_is_inside_slot(slot):
+			var success = slot.check_drop_item(item)
+			return success
+	return false
+
+func mouse_is_inside_slot(slot : Panel):
+	return slot.get_global_rect().has_point(get_global_mouse_position())
+
+func on_item_equip(item : Item):
+	item_equip.emit(item)
+	pass
+
+func on_item_unequip(item : Item):
+	item_unequip.emit(item)
+	pass
+
+func on_item_highlighted(item : Item):
+	item_highlighted.emit(item)
+	pass
+
+func on_item_highlighted_exited():
+	item_highlighted_exited.emit()
+	pass
+
+func on_item_dragging(item : Item):
+	item_dragging.emit(item)
+	pass
+
+func on_item_changed(item : Item):
+	item_changed.emit(item)
+	pass
+"
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_86vk4"]
+bg_color = Color(0.195313, 0.195313, 0.195313, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+expand_margin_left = 4.0
+expand_margin_top = 4.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
+
+[sub_resource type="LabelSettings" id="LabelSettings_5p80a"]
+font_size = 14
+
+[node name="Inventory" type="Control" node_paths=PackedStringArray("inventory_slots", "character_info", "item_info")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = SubResource("GDScript_6bn6h")
+inventory_slots = NodePath("InventorySlots")
+character_info = NodePath("Character")
+item_info = NodePath("ItemInfo")
+
+[node name="Character" type="Panel" parent="." node_paths=PackedStringArray("item_slots", "damage_stat", "defense_stat", "speed_stat")]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -565.0
+offset_top = -282.0
+offset_right = -253.0
+offset_bottom = -71.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_oilkp")
+script = SubResource("GDScript_va6r0")
+item_slots = NodePath("ItemSlots")
+damage_stat = NodePath("Stats/Items/Damage")
+defense_stat = NodePath("Stats/Items/Defense")
+speed_stat = NodePath("Stats/Items/Speed")
+
+[node name="ItemSlots" type="VBoxContainer" parent="Character"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -80.0
+offset_top = -103.5
+offset_right = -16.0
+offset_bottom = 104.5
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="Helmet" parent="Character/ItemSlots" instance=ExtResource("2_5cqqp")]
+layout_mode = 2
+type = 0
+
+[node name="Armor" parent="Character/ItemSlots" instance=ExtResource("2_5cqqp")]
+layout_mode = 2
+type = 1
+
+[node name="Weapon" parent="Character/ItemSlots" instance=ExtResource("2_5cqqp")]
+layout_mode = 2
+type = 2
+
+[node name="Stats" type="Panel" parent="Character"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 20.0
+offset_top = -97.5
+offset_right = 176.0
+offset_bottom = 102.5
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_86vk4")
+
+[node name="Title" type="Label" parent="Character/Stats"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -76.0
+offset_right = 76.0
+offset_bottom = 23.0
+grow_horizontal = 2
+text = "STATS"
+horizontal_alignment = 1
+
+[node name="Items" type="VBoxContainer" parent="Character/Stats"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -74.0
+offset_top = -73.0
+offset_right = 76.0
+offset_bottom = 92.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Damage" type="Label" parent="Character/Stats/Items"]
+layout_mode = 2
+text = "Damage: 00"
+label_settings = SubResource("LabelSettings_5p80a")
+
+[node name="Defense" type="Label" parent="Character/Stats/Items"]
+layout_mode = 2
+text = "Defense:"
+label_settings = SubResource("LabelSettings_5p80a")
+
+[node name="Speed" type="Label" parent="Character/Stats/Items"]
+layout_mode = 2
+text = "Movement Speed 10"
+label_settings = SubResource("LabelSettings_5p80a")
+
+[node name="InventorySlots" parent="." instance=ExtResource("2_jpdu8")]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -568.0
+offset_top = -58.0
+offset_right = -248.0
+offset_bottom = 198.0
+grow_horizontal = 0
+grow_vertical = 2
+
+[node name="ItemInfo" parent="." instance=ExtResource("3_14qqg")]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 121.0
+offset_top = -118.0
+offset_right = 121.0
+offset_bottom = -118.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[connection signal="drop_item" from="." to="InventorySlots" method="_on_inventory_drop_item"]
+[connection signal="item_changed" from="Character" to="." method="_on_character_item_changed"]
+[connection signal="item_dragging" from="Character" to="." method="_on_character_item_dragging"]
+[connection signal="item_highlighted" from="Character" to="." method="_on_character_item_highlighted"]
+[connection signal="item_highlighted_exited" from="Character" to="." method="_on_character_item_highlighted_exited"]
+[connection signal="item_highlighted" from="InventorySlots" to="." method="_on_inventory_slots_item_highlighted"]
+[connection signal="item_highlighted_exited" from="InventorySlots" to="." method="_on_inventory_slots_item_highlighted_exited"]
+[connection signal="item_start_dragging" from="InventorySlots" to="." method="_on_inventory_slots_item_start_dragging"]

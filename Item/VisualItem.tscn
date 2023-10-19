@@ -1,0 +1,87 @@
+[gd_scene load_steps=7 format=3 uid="uid://dsiwlp34aqql3"]
+
+[ext_resource type="Script" path="res://Item/item.gd" id="1_o0m0y"]
+[ext_resource type="Texture2D" uid="uid://dsdwc2oi1vo4" path="res://Item/Wood.png" id="1_ylx0y"]
+
+[sub_resource type="GDScript" id="GDScript_hjs5a"]
+resource_name = "Visualitem"
+script/source = "extends Area2D
+
+@export var pick_speed : float = 750
+@export var item : Item = null
+@onready var player : CharacterBody2D = get_tree().get_first_node_in_group(\"Player\")
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	set_process(false)
+	if item == null: return
+	item = item.duplicate()
+	set_item_data(item)
+	pass # Replace with function body.
+
+func get_item_data():
+	return item
+
+func set_item_data(item_data : Item):
+	item = item_data
+	$Sprite2D.texture = item.icon
+	$Sprite2D2.texture = item.icon
+	$Sprite2D3.texture = item.icon
+	if item.stackable:
+		$Sprite2D2.visible = item.amount >= 15
+		$Sprite2D3.visible = item.amount >= 30
+	pass
+
+func pick():
+	set_process(true)
+	pass
+
+func _process(delta):
+	var dir = player.global_position - global_position
+	translate(dir.normalized() *  pick_speed * delta)
+	if player.global_position.distance_to(global_position) < 10:
+		queue_free()
+	pass
+"
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_7bln8"]
+load_path = "res://.godot/imported/Wood.png-3bf56270e611547a322ef86fff55b988.ctex"
+
+[sub_resource type="Resource" id="Resource_6uydw"]
+script = ExtResource("1_o0m0y")
+id = 0
+icon = SubResource("CompressedTexture2D_7bln8")
+name = "Wood"
+stackable = true
+amount = 1
+info = "Can be used to craft weapons"
+equipable = false
+type = 4
+drop_probability = 0.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ikuvt"]
+radius = 31.1448
+
+[node name="VisualItem" type="Area2D"]
+z_index = -1
+texture_filter = 1
+collision_layer = 16
+script = SubResource("GDScript_hjs5a")
+item = SubResource("Resource_6uydw")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(-4, 2)
+texture = ExtResource("1_ylx0y")
+
+[node name="Sprite2D2" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(14, 3)
+texture = ExtResource("1_ylx0y")
+
+[node name="Sprite2D3" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(3, -15)
+texture = ExtResource("1_ylx0y")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_ikuvt")

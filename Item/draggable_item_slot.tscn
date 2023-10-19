@@ -1,0 +1,72 @@
+[gd_scene load_steps=4 format=3 uid="uid://cbt3826nsmou"]
+
+[ext_resource type="Texture2D" uid="uid://dsdwc2oi1vo4" path="res://Item/Wood.png" id="4_d0ojf"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6bt84"]
+bg_color = Color(0.196078, 0.196078, 0.196078, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="GDScript" id="GDScript_eu3ov"]
+resource_name = "draggable_item_slot"
+script/source = "extends Panel
+
+var item_ref : Item
+
+var pressing : bool = false
+var dragging : bool = false
+
+signal drop_draggable(item)
+
+func _ready():
+	set_process(false)
+	pass
+
+func _process(delta):
+	position = get_global_mouse_position()
+	pass
+
+func set_data(item : Item):
+	item_ref = item
+	$Icon.texture = item.icon
+	set_process(true)
+	pass
+
+func _input(event):
+	if event is InputEventScreenTouch:
+		pressing = event.is_pressed()
+		if not pressing:
+			dragging = false
+			drop_draggable.emit(item_ref)
+	if event is InputEventScreenDrag and pressing:
+		dragging = true
+	pass
+"
+
+[node name="CharacterItemSlot" type="Panel"]
+texture_filter = 1
+custom_minimum_size = Vector2(64, 64)
+offset_right = 64.0
+offset_bottom = 64.0
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_6bt84")
+script = SubResource("GDScript_eu3ov")
+
+[node name="Icon" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("4_d0ojf")
+expand_mode = 1
+stretch_mode = 5

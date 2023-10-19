@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="DefenseItem" load_steps=3 format=3 uid="uid://va0pq2uv2vyv"]
+
+[ext_resource type="Script" path="res://Item/defense_item.gd" id="1_ba7f4"]
+[ext_resource type="Texture2D" uid="uid://dh4ft34h6f7qh" path="res://Item/DiamondArmor.png" id="1_eswc6"]
+
+[resource]
+script = ExtResource("1_ba7f4")
+defense = 5.0
+id = 5
+icon = ExtResource("1_eswc6")
+name = "Diamond Armor"
+stackable = false
+amount = 1
+info = "Very expensive hehe"
+equipable = false
+type = 1

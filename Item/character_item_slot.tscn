@@ -1,0 +1,104 @@
+[gd_scene load_steps=7 format=3 uid="uid://fou3wfecg6uk"]
+
+[ext_resource type="Texture2D" uid="uid://dsdwc2oi1vo4" path="res://Item/Wood.png" id="1_083vb"]
+[ext_resource type="Texture2D" uid="uid://01kote2utvsu" path="res://Item/SwordIcon.png" id="1_mlu1s"]
+[ext_resource type="Texture2D" uid="uid://c5ybbbojnr1dr" path="res://Item/HelmetIcon.png" id="1_ujnqp"]
+[ext_resource type="Texture2D" uid="uid://ci7pc1gcmpm76" path="res://Item/ArmorIcon.png" id="2_pxm3b"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6bt84"]
+bg_color = Color(0.196078, 0.196078, 0.196078, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="GDScript" id="GDScript_gqdtn"]
+resource_name = "CharacterItemSlot"
+script/source = "extends Panel
+
+@export var item_ref : Item
+@export var draggable : bool = false
+
+@export var type : Item.Type = Item.Type.GENERAL
+
+@export var textures_slot : Array
+
+signal item_highlighted(item)
+signal item_highlighted_exited
+signal item_equip(item)
+signal item_unequip(item)
+signal item_start_dragging(item)
+signal item_changed(item)
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	$Icon.texture = textures_slot[type]
+	pass # Replace with function body.
+
+func set_data(item_data : Item):
+	item_ref = item_data
+	$Icon.texture = item_data.icon
+	pass
+
+func check_drop_item(item : Item):
+	if item.type == type:
+		if item_ref:
+			item_changed.emit(item_ref)
+			item_unequip.emit(item_ref)
+		set_data(item)
+		item_equip.emit(item)
+		return true
+	return false
+
+func reset():
+	if item_ref:
+		item_unequip.emit(item_ref)
+	item_ref = null
+	$Icon.texture = textures_slot[type]
+	pass
+
+func _gui_input(event):
+	if item_ref == null: return
+	if event is InputEventScreenTouch and event.is_pressed() and not event.is_echo():
+		item_start_dragging.emit(item_ref)
+		reset()
+
+func _on_mouse_entered():
+	if item_ref == null: return
+	item_highlighted.emit(item_ref)
+	pass # Replace with function body.
+
+func _on_mouse_exited():
+	item_highlighted_exited.emit()
+	pass # Replace with function body.
+"
+
+[node name="CharacterItemSlot" type="Panel"]
+texture_filter = 1
+custom_minimum_size = Vector2(64, 64)
+offset_right = 64.0
+offset_bottom = 64.0
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_6bt84")
+script = SubResource("GDScript_gqdtn")
+textures_slot = [ExtResource("1_ujnqp"), ExtResource("2_pxm3b"), ExtResource("1_mlu1s"), ExtResource("1_mlu1s"), ExtResource("1_mlu1s")]
+
+[node name="Icon" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("1_083vb")
+expand_mode = 1
+stretch_mode = 5
+
+[connection signal="mouse_entered" from="." to="." method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="." to="." method="_on_mouse_exited"]

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="DefenseItem" load_steps=3 format=3 uid="uid://dg7nlffrbli2o"]
+
+[ext_resource type="Texture2D" uid="uid://bxgf71bh5milk" path="res://Item/LeatherCap.png" id="1_tod7x"]
+[ext_resource type="Script" path="res://Item/defense_item.gd" id="1_ucd8g"]
+
+[resource]
+script = ExtResource("1_ucd8g")
+defense = 1.0
+id = 4
+icon = ExtResource("1_tod7x")
+name = "Leather Cap"
+stackable = false
+amount = 1
+info = "It protects you from rain"
+equipable = true
+type = 0
+drop_probability = 0.1

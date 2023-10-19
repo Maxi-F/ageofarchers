@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponItem" load_steps=3 format=3 uid="uid://djsycanoeeu7b"]
+
+[ext_resource type="Script" path="res://Item/weapon_item.gd" id="1_i2ju5"]
+[ext_resource type="Texture2D" uid="uid://c4p3jknc71x3s" path="res://Item/WoodenSword.png" id="1_ssmuu"]
+
+[resource]
+script = ExtResource("1_i2ju5")
+damage = 2
+weapon_type = 1
+id = 2
+icon = ExtResource("1_ssmuu")
+name = "Wooden Sword"
+stackable = false
+amount = 1
+info = "An old wooden sword"
+equipable = true
+type = 2
+drop_probability = 0.0

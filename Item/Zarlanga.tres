@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="Item" load_steps=3 format=3 uid="uid://ddbujopbf4tu0"]
+
+[ext_resource type="Script" path="res://Item/item.gd" id="1_18qfm"]
+[ext_resource type="Texture2D" uid="uid://c4p3jknc71x3s" path="res://Item/WoodenSword.png" id="1_hpk48"]
+
+[resource]
+script = ExtResource("1_18qfm")
+id = 17
+icon = ExtResource("1_hpk48")
+name = "Zarlanga"
+stackable = false
+amount = 1
+info = "Espada de madera"
+equipable = true
+type = 2
+drop_probability = 0.0

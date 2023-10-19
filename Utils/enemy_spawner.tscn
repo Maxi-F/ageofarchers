@@ -1,0 +1,53 @@
+[gd_scene load_steps=3 format=3 uid="uid://bcnhbpy6uajij"]
+
+[ext_resource type="PackedScene" uid="uid://bpu7wfkx1fg31" path="res://Objects/enemy.tscn" id="1_ut1lw"]
+
+[sub_resource type="GDScript" id="GDScript_eoirf"]
+script/source = "extends Node2D
+
+@export var enemy_scene : PackedScene = null
+@export var MAX_ENEMY_COUNT : int = 0
+@onready var enemies_parent : Node = get_tree().root.get_node(\"GameScene/Enemies\")
+
+var enemy_count : int = 0
+
+func _spawn_enemy():
+	if enemy_count >= MAX_ENEMY_COUNT:
+		$Timer.stop()
+	else:
+		var enemy : CharacterBody2D = enemy_scene.instantiate()
+		enemies_parent.add_child(enemy)
+		enemy.global_position = global_position
+		enemy.dead.connect(on_enemy_dead)
+		$Timer.start()
+		enemy_count += 1
+	pass
+
+func on_enemy_dead(enemy: CharacterBody2D):
+	enemy_count -= 1
+	enemies_parent.remove_child(enemy)
+	if enemy_count < MAX_ENEMY_COUNT:
+		$Timer.start()
+	pass
+
+func _on_timer_timeout():
+	_spawn_enemy()
+	pass # Replace with function body.
+
+
+func _on_player_player_moved(distance_moved: Vector2):
+	position.x += distance_moved.x
+	position.y += distance_moved.y
+	pass # Replace with function body.
+"
+
+[node name="EnemySpawner" type="Marker2D"]
+script = SubResource("GDScript_eoirf")
+enemy_scene = ExtResource("1_ut1lw")
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 2.0
+one_shot = true
+autostart = true
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

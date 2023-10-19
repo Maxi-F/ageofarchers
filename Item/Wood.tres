@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="Item" load_steps=3 format=3 uid="uid://cgie2lnifooym"]
+
+[ext_resource type="Texture2D" uid="uid://dsdwc2oi1vo4" path="res://Item/Wood.png" id="1_0lrgi"]
+[ext_resource type="Script" path="res://Item/item.gd" id="1_6wvqn"]
+
+[resource]
+script = ExtResource("1_6wvqn")
+id = 0
+icon = ExtResource("1_0lrgi")
+name = "Wood"
+stackable = true
+amount = 1
+info = "Can be used to craft weapons"

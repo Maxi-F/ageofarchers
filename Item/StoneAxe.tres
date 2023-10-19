@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponItem" load_steps=3 format=3 uid="uid://demiu1fy45x1t"]
+
+[ext_resource type="Texture2D" uid="uid://bh4ro2ehwa8k3" path="res://Item/StoneAxe.png" id="1_b65w2"]
+[ext_resource type="Script" path="res://Item/weapon_item.gd" id="2_6lt0j"]
+
+[resource]
+script = ExtResource("2_6lt0j")
+damage = 0
+weapon_type = 0
+id = 10
+icon = ExtResource("1_b65w2")
+name = "Stone Axe"
+stackable = false
+amount = 1
+info = "The basic to chop a tree"
+equipable = true
+type = 2
+drop_probability = 0.0
