@@ -14,7 +14,7 @@ signal inventory_opened(inventory_visible)
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	GameManager.set_player()
+	var test = GameManager.player
 	GameManager.player.health_update.connect(Callable(self, \"on_player_health_update\"))
 	pass # Replace with function body.
 

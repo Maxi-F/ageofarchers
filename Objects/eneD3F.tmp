@@ -54,12 +54,15 @@ func take_damage(arrow: Area2D):
 		emit_signal(\"dead\", self)
 	pass
 
+func take_damage():
+	pass
+
 func _on_area_2d_area_entered(area: Area2D):
 	if area.is_in_group(\"PlayerProyectile\"):
 		take_damage(area)
 		area.queue_free()
-	if area.get_parent().is_in_group(\"Player\"):
-		area.get_parent().take_damage()
+	else:
+		area.take_damage()
 	pass # Replace with function body.
 "
 
@@ -124,8 +127,10 @@ _data = {
 [node name="Enemy" type="CharacterBody2D" node_paths=PackedStringArray("anim") groups=["Enemy"]]
 collision_mask = 7
 script = SubResource("GDScript_4885k")
+speed = null
 anim = NodePath("Anim")
 drop_item_list = [ExtResource("1_df1w6"), ExtResource("2_i3yq4")]
+drop_multiplier = null
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture_filter = 1

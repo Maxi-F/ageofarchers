@@ -26,6 +26,7 @@ func _spawn_enemy():
 func on_enemy_dead(enemy: CharacterBody2D):
 	enemy_count -= 1
 	enemies_parent.remove_child(enemy)
+	enemy.queue_free()
 	if enemy_count < MAX_ENEMY_COUNT:
 		$Timer.start()
 	pass
@@ -36,8 +37,7 @@ func _on_timer_timeout():
 
 
 func _on_player_player_moved(distance_moved: Vector2):
-	position.x += distance_moved.x
-	position.y += distance_moved.y
+	translate(distance_moved)
 	pass # Replace with function body.
 "
 

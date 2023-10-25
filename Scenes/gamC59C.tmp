@@ -10,19 +10,7 @@ script/source = "extends CanvasLayer
 
 @export var inventory : Control
 
-signal inventory_opened(inventory_visible)
-
-# Called when the node enters the scene tree for the first time.
 func _ready():
-	GameManager.set_player()
-	GameManager.player.health_update.connect(Callable(self, \"on_player_health_update\"))
-	pass # Replace with function body.
-
-func on_player_health_update(health : float):
-	#tweens #Between
-	var tween : Tween = create_tween()
-	tween.tween_property($HealthBar, \"value\", health, 0.2)
-	tween.play()
 	pass
 "
 
@@ -50,8 +38,9 @@ bg_color = Color(0.8, 0, 0, 1)
 [node name="GameScene" type="Node2D"]
 y_sort_enabled = true
 
-[node name="UI" type="CanvasLayer" parent="."]
+[node name="UI" type="CanvasLayer" parent="." node_paths=PackedStringArray("inventory")]
 script = SubResource("GDScript_xkdgq")
+inventory = NodePath("")
 
 [node name="Main" type="Control" parent="UI"]
 texture_filter = 1
@@ -62,7 +51,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="HealthBar" type="ProgressBar" parent="UI"]
+[node name="ProgressBar" type="ProgressBar" parent="UI"]
 offset_left = 7.0
 offset_top = 5.0
 offset_right = 168.0

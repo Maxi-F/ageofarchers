@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://bpivxar8otj3b"]
+[gd_scene load_steps=23 format=3 uid="uid://bpivxar8otj3b"]
 
 [ext_resource type="PackedScene" uid="uid://b4dberiu5p3r3" path="res://Objects/arrow.tscn" id="1_ewvag"]
 [ext_resource type="PackedScene" uid="uid://dmr0fcamx7t56" path="res://joystick/virtual_joystick.tscn" id="2_1p7tw"]
@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://dh4ft34h6f7qh" path="res://Item/DiamondArmor.png" id="3_2bcbp"]
 [ext_resource type="PackedScene" uid="uid://bcnhbpy6uajij" path="res://Utils/enemy_spawner.tscn" id="3_d0taj"]
 [ext_resource type="Texture2D" uid="uid://bxgf71bh5milk" path="res://Item/LeatherCap.png" id="4_ldbhn"]
+[ext_resource type="Texture2D" uid="uid://c4p3jknc71x3s" path="res://Item/WoodenSword.png" id="5_qwjvm"]
 [ext_resource type="Texture2D" uid="uid://b1vf6v5h8dq5a" path="res://Item/Key_E.png" id="6_m2txc"]
 
 [sub_resource type="GDScript" id="GDScript_mscux"]
@@ -64,7 +65,7 @@ func _process_anim():
 	pass
 
 func take_damage():
-	health -= 4.0
+	health -= 2.0
 	emit_signal(\"health_update\", health)
 
 func _on_shot_arrow_timer_timeout():
@@ -214,6 +215,136 @@ func _check_actions_visible():
 	pass
 "
 
+[sub_resource type="GDScript" id="GDScript_lvrbt"]
+resource_name = "MeleeAtack"
+script/source = "extends Node2D
+
+var objects : Array = []
+var item_ref : Item = null
+
+@export var player : CharacterBody2D = null
+
+var mobile_device : bool = false
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	set_enable(false)
+	InventoryManager.item_equiped.connect(on_item_equiped)
+	InventoryManager.item_unequiped.connect(on_item_unequiped)
+	mobile_device = OS.get_name() == \"Android\"
+	if mobile_device:
+		InputMap.action_erase_events(\"attack\")
+	pass # Replace with function body.
+
+func on_item_equiped(item : Item):
+	if item.type != Item.Type.WEAPON: return
+	item_ref = item
+	set_enable(true)
+	$Area2D/Weapon.texture = item.icon
+	pass
+
+func on_item_unequiped(item : Item):
+	if item.type != Item.Type.WEAPON: return
+	set_enable(false)
+	$Area2D/Weapon.texture = null
+	item_ref = null
+	pass
+
+func set_enable(enable : bool):
+	set_process(enable)
+	visible = enable
+	pass
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta):
+	if mobile_device:
+		rotation = atan2(player.movement_direction.y, player.movement_direction.x)
+	else:
+		rotation = global_position.angle_to_point(get_global_mouse_position())
+	if Input.is_action_just_pressed(\"attack\"):
+		_attack()
+	pass
+
+func _attack():
+	for object in objects:
+		object.take_damage(item_ref)
+	$Anim.play(\"Attack\")
+	pass
+
+func _on_area_2d_body_entered(body):
+	objects.append(body)
+	pass # Replace with function body.
+
+
+func _on_area_2d_body_exited(body):
+	objects.erase(body)
+	pass # Replace with function body.
+"
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_3gqgm"]
+radius = 48.5077
+
+[sub_resource type="Animation" id="Animation_7vhn5"]
+resource_name = "Attack"
+length = 0.4
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Area2D/Weapon:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(-36, -3.05176e-05), Vector2(-48, 0.999969), Vector2(-22, 0.999969), Vector2(-36, -3.05176e-05)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Area2D/Weapon:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [0.810073, -0.112609, 2.12682, 0.810073]
+}
+
+[sub_resource type="Animation" id="Animation_5of1h"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Area2D/Weapon:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(-36, -3.05176e-05)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Area2D/Weapon:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.810073]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_bkc6o"]
+_data = {
+"Attack": SubResource("Animation_7vhn5"),
+"RESET": SubResource("Animation_5of1h")
+}
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wytj3"]
 size = Vector2(44, 87)
 
@@ -315,6 +446,33 @@ wait_time = 0.5
 one_shot = true
 autostart = true
 
+[node name="MeleeAttack" type="Node2D" parent="." node_paths=PackedStringArray("player")]
+visible = false
+z_index = 1
+script = SubResource("GDScript_lvrbt")
+player = NodePath("..")
+
+[node name="Area2D" type="Area2D" parent="MeleeAttack"]
+position = Vector2(60, -1)
+collision_mask = 34
+
+[node name="Weapon" type="Sprite2D" parent="MeleeAttack/Area2D"]
+texture_filter = 1
+position = Vector2(-36, -3.05176e-05)
+rotation = 0.810073
+scale = Vector2(1.0423, 1.0423)
+texture = ExtResource("5_qwjvm")
+offset = Vector2(27.2, -27.2001)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="MeleeAttack/Area2D"]
+shape = SubResource("CircleShape2D_3gqgm")
+debug_color = Color(0.627451, 0.356863, 0.980392, 0.419608)
+
+[node name="Anim" type="AnimationPlayer" parent="MeleeAttack"]
+libraries = {
+"": SubResource("AnimationLibrary_bkc6o")
+}
+
 [node name="Area2D" type="Area2D" parent="."]
 collision_layer = 3
 collision_mask = 3
@@ -328,3 +486,5 @@ shape = SubResource("RectangleShape2D_wytj3")
 [connection signal="player_moved" from="." to="Camera2D/EnemySpawner3" method="_on_player_player_moved"]
 [connection signal="player_moved" from="." to="Camera2D/EnemySpawner4" method="_on_player_player_moved"]
 [connection signal="timeout" from="ShotArrowTimer" to="." method="_on_shot_arrow_timer_timeout"]
+[connection signal="body_entered" from="MeleeAttack/Area2D" to="MeleeAttack" method="_on_area_2d_body_entered"]
+[connection signal="body_exited" from="MeleeAttack/Area2D" to="MeleeAttack" method="_on_area_2d_body_exited"]

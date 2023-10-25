@@ -1,17 +1,7 @@
 extends Node
 
-class Stats:
-	var defense : float = 0
-	var attack : float = 0
-	var speed : float = 0
+var player : CharacterBody2D = null
 
-signal inventory_opened(inventory_visible)
-signal player_stats_updated(stats)
-
-func on_inventory_opened(is_visible : bool):
-	inventory_opened.emit(is_visible)
-	pass
-
-func on_player_stats_updated(stats : Stats):
-	player_stats_updated.emit(stats)
+func set_player():
+	player = get_tree().get_first_node_in_group("Player")
 	pass
