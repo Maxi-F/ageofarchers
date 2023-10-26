@@ -7,7 +7,6 @@ func _ready():
 
 func _on_play_button_pressed():
 	get_tree().change_scene_to_file("res://Scenes/game_scene.tscn")
-	GameManager.set_player()
 	pass
 
 

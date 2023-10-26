@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://csm5whtlg5epl"]
+[gd_scene load_steps=8 format=3 uid="uid://csm5whtlg5epl"]
 
 [ext_resource type="Texture2D" uid="uid://d3x4jekyvm1cp" path="res://Objects/Background.jpg" id="2_4kenl"]
 [ext_resource type="PackedScene" uid="uid://bpivxar8otj3b" path="res://Objects/player.tscn" id="2_bht3b"]
@@ -47,6 +47,18 @@ shadow_offset = Vector2(1, 2)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3dtbt"]
 bg_color = Color(0.8, 0, 0, 1)
 
+[sub_resource type="GDScript" id="GDScript_aiw7l"]
+script/source = "extends Label
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta):
+	if(GameManager.time):
+		var secs =  fmod(GameManager.time, 60)
+		var mins = fmod(GameManager.time, 60*60) / 60
+		text = \"%02d:%02d\" % [mins, secs]
+	pass
+"
+
 [node name="GameScene" type="Node2D"]
 y_sort_enabled = true
 
@@ -71,6 +83,14 @@ theme_override_styles/background = SubResource("StyleBoxFlat_3b3ld")
 theme_override_styles/fill = SubResource("StyleBoxFlat_3dtbt")
 value = 100.0
 show_percentage = false
+
+[node name="TimerLabel" type="Label" parent="UI"]
+offset_left = 448.0
+offset_top = 32.0
+offset_right = 704.0
+offset_bottom = 64.0
+horizontal_alignment = 1
+script = SubResource("GDScript_aiw7l")
 
 [node name="Bacgkround" type="ParallaxBackground" parent="."]
 
